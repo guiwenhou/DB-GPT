@@ -30,7 +30,7 @@ from dbgpt.agent.expand.code_assistant_agent import CodeAssistantAgent
 async def main():
     from dbgpt.model.proxy import OpenAILLMClient
 #
-    # llm_client = OpenAILLMClient(model_alias="gpt-3.5-turbo")
+    llm_client = OpenAILLMClient(model_alias="gpt-3.5-turbo")
     llm_client = OpenAILLMClient(api_base="http://192.168.1.7:8000/v1",api_key="124",model_alias="Qwen1.5-14B-Chat")    
     context: AgentContext = AgentContext(conv_id="test123")
     agent_memory = AgentMemory(HybridMemory[AgentMemoryFragment].from_chroma())
