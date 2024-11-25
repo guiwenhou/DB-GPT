@@ -15,6 +15,7 @@
 """
 
 import asyncio
+import os
 
 from dbgpt.agent import (
     AgentContext,
@@ -33,26 +34,27 @@ async def main():
     # llm_client = OpenAILLMClient(model_alias="gpt-3.5-turbo")
     llm_client = OpenAILLMClient(api_base="http://192.168.1.7:8000/v1",api_key="124",model_alias="Qwen1.5-14B-Chat")    
     context: AgentContext = AgentContext(conv_id="test123")
-    agent_memory = AgentMemory(HybridMemory[AgentMemoryFragment].from_chroma())
+    agent_memory = AgentMemory()
+    agent_memory.gpts_memory.init(conv_id="test123")
+    try:
+        coder = (
+            await CodeAssistantAgent()
+            .bind(context)
+            .bind(LLMConfig(llm_client=llm_client))
+            .bind(agent_memory)
+            .build()
+        )
 
-    coder = (
-        await CodeAssistantAgent()
-        .bind(context)
-        .bind(LLMConfig(llm_client=llm_client))
-        .bind(agent_memory)
-        .build()
-    )
+        user_proxy = await UserProxyAgent().bind(context).bind(agent_memory).build()
 
-    user_proxy = await UserProxyAgent().bind(context).bind(agent_memory).build()
-
-    await user_proxy.initiate_chat(
-        recipient=coder,
-        reviewer=user_proxy,
-        message="计算下321 * 123等于多少",  # 用python代码的方式计算下321 * 123等于多少
-        # message="download data from https://raw.githubusercontent.com/uwdata/draco/master/data/cars.csv and plot a visualization that tells us about the relationship between weight and horsepower. Save the plot to a file. Print the fields in a dataset before visualizing it.",
-    )
-    ## dbgpt-vis message infos
-    print(await agent_memory.gpts_memory.one_chat_completions("test123"))
+        await user_proxy.initiate_chat(
+            recipient=coder,
+            reviewer=user_proxy,
+            message="计算下321 * 123等于多少",  # 用python代码的方式计算下321 * 123等于多少
+            # message="download data from https://raw.githubusercontent.com/uwdata/draco/master/data/cars.csv and plot a visualization that tells us about the relationship between weight and horsepower. Save the plot to a file. Print the fields in a dataset before visualizing it.",
+        )
+    finally:
+        agent_memory.gpts_memory.clear(conv_id="test123")
 
 
 if __name__ == "__main__":

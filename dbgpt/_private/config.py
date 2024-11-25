@@ -78,17 +78,13 @@ class Config(metaclass=Singleton):
             )
 
         # xunfei spark
-        self.spark_api_version = os.getenv("XUNFEI_SPARK_API_VERSION")
-        self.spark_proxy_api_key = os.getenv("XUNFEI_SPARK_API_KEY")
-        self.spark_proxy_api_secret = os.getenv("XUNFEI_SPARK_API_SECRET")
-        self.spark_proxy_api_appid = os.getenv("XUNFEI_SPARK_APPID")
-        if self.spark_proxy_api_key and self.spark_proxy_api_secret:
-            os.environ["spark_proxyllm_proxy_api_key"] = self.spark_proxy_api_key
-            os.environ["spark_proxyllm_proxy_api_secret"] = self.spark_proxy_api_secret
-            os.environ["spark_proxyllm_proxyllm_backend"] = self.spark_api_version or ""
-            os.environ["spark_proxyllm_proxy_api_app_id"] = (
-                self.spark_proxy_api_appid or ""
-            )
+        self.spark_proxy_api_password = os.getenv("XUNFEI_SPARK_API_PASSWORD")
+        self.spark_proxy_api_model = os.getenv("XUNFEI_SPARK_API_MODEL")
+        if self.spark_proxy_api_model and self.spark_proxy_api_password:
+            os.environ[
+                "spark_proxyllm_proxy_api_password"
+            ] = self.spark_proxy_api_password
+            os.environ["spark_proxyllm_proxy_api_model"] = self.spark_proxy_api_model
 
         # baichuan proxy
         self.bc_proxy_api_key = os.getenv("BAICHUAN_PROXY_API_KEY")
@@ -232,11 +228,9 @@ class Config(metaclass=Singleton):
         self.OB_USER = os.getenv("OB_USER", "root")
         self.OB_PASSWORD = os.getenv("OB_PASSWORD", "")
         self.OB_DATABASE = os.getenv("OB_DATABASE", "test")
-        self.OB_SQL_DBG_LOG_PATH = os.getenv("OB_SQL_DBG_LOG_PATH", "")
         self.OB_ENABLE_NORMALIZE_VECTOR = bool(
             os.getenv("OB_ENABLE_NORMALIZE_VECTOR", "")
         )
-        self.OB_ENABLE_INDEX = bool(os.getenv("OB_ENABLE_INDEX", ""))
 
         # QLoRA
         self.QLoRA = os.getenv("QUANTIZE_QLORA", "True")
@@ -338,6 +332,10 @@ class Config(metaclass=Singleton):
         self.SCHEDULER_ENABLED = (
             os.getenv("SCHEDULER_ENABLED", "True").lower() == "true"
         )
+        self.NOTE_BOOK_ENABLE: bool = (
+            os.getenv("NOTE_BOOK_ENABLE", "True").lower() == "true"
+        )
+        self.NOTE_BOOK_ROOT: str = os.getenv("NOTE_BOOK_ROOT", os.path.expanduser("~"))
 
     @property
     def local_db_manager(self) -> "ConnectorManager":
